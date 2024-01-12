@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.cloud.mapper.AccountMapper">
+    <resultMap id="BaseResultMap" type="com.atguigu.cloud.entities.Account">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="user_id" jdbcType="BIGINT" property="userId" />
+        <result column="total" jdbcType="DECIMAL" property="total" />
+        <result column="used" jdbcType="DECIMAL" property="used" />
+        <result column="residue" jdbcType="DECIMAL" property="residue" />
+    </resultMap>
+
+
+    <!--
+        money   本次消费金额
+
+        t_account数据库表
+        total总额度 = 累计已消费金额(used) + 剩余可用额度(residue)
+    -->
+    <update id="decrease">
+        UPDATE
+            t_account
+        SET
+            residue = residue - #{money},used = used + #{money}
+        WHERE user_id = #{userId};
+    </update>
+
+</mapper>
+
+
+

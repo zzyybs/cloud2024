@@ -1,0 +1,57 @@
+server:
+  port: 9527
+
+spring:
+  application:
+    name: cloud-gateway #以微服务注册进consul或nacos服务列表内
+  cloud:
+    consul: #配置consul地址
+      host: localhost
+      port: 8500
+      discovery:
+        prefer-ip-address: true
+        service-name: ${spring.application.name}
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          #uri: http://localhost:8001                #匹配后提供服务的路由地址
+          uri: lb://cloud-payment-service                #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**              # 断言，路径相匹配的进行路由
+            - After=2023-12-30T23:02:39.079979400+08:00[Asia/Shanghai]
+            #- Cookie=username,zzyy
+            # - Header=X-Request-Id, \d+ # 请求头要有X-Request-Id属性并且值为整数的正则表达式
+            #- Host=**.atguigu.com
+            #- Query=username, \d+  # 要有参数名username并且值还要是整数才能路由
+            #- RemoteAddr=192.168.124.1/24 # 外部访问我的IP限制，最大跨度不超过32，目前是1~24它们是 CIDR 表示法。
+            #- My=gold
+#            - name: My
+#              args:
+#                userType: diamond
+
+        - id: pay_routh2 #pay_routh2                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          #uri: http://localhost:8001                #匹配后提供服务的路由地址
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/pay/gateway/info/**              # 断言，路径相匹配的进行路由
+
+        - id: pay_routh3 #pay_routh3
+          uri: lb://cloud-payment-service                #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/filter/**              # 断言，路径相匹配的进行路由，默认正确地址
+            #- Path=/gateway/filter/**              # 断言，为配合PrefixPath测试过滤，暂时注释掉/pay
+            #- Path=/XYZ/abc/{segment}           # 断言，为配合SetPath测试，{segment}的内容最后被SetPath取代
+          filters:
+            - My=atguigu
+            #- RedirectTo=302, http://www.atguigu.com/ # 访问http://localhost:9527/pay/gateway/filter跳转到http://www.atguigu.com/
+            #- SetPath=/pay/gateway/{segment}  # {segment}表示占位符，你写abc也行但要上下一致
+            #- PrefixPath=/pay # http://localhost:9527/pay/gateway/filter  被分拆为: PrefixPath + Path
+            - AddRequestHeader=X-Request-atguigu1,atguiguValue1  # 请求头kv，若一头含有多参则重写一行设置
+            #- AddRequestHeader=X-Request-atguigu2,atguiguValue2
+            #- RemoveRequestHeader=sec-fetch-site      # 删除请求头sec-fetch-site
+            #- SetRequestHeader=sec-fetch-mode, Blue-updatebyzzyy # 将请求头sec-fetch-mode对应的值修改为Blue-updatebyzzyy
+            #- AddRequestParameter=customerId,9527001 # 新增请求参数Parameter：k ，v
+            #- RemoveRequestParameter=customerName   # 删除url请求参数customerName，你传递过来也是null
+            #- AddResponseHeader=X-Response-atguigu, BlueResponse # 新增请求参数X-Response-atguigu并设值为BlueResponse
+            #- SetResponseHeader=Date,2099-11-11 # 设置回应头Date值为2099-11-11
+            #- RemoveResponseHeader=Content-Type # 将默认自带Content-Type回应属性删除
